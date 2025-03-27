@@ -13,7 +13,7 @@ body
     background-color: #D8E5F1;
     width: 100%;
     height: 100%;
-    overflow: scroll;
+    overflow: auto;
 }
 .header
 {
@@ -41,12 +41,12 @@ body
 {
     margin-left: 10px;
 }
-.header_buttons,.logout_button
+.header_buttons,.logoutButton
 {
     display: flex;
     height: 80%;
 }
-.header_buttons a,.logout_button button
+.header_buttons a,.logoutButton button
 {
     display: flex;
     background: none;
@@ -58,7 +58,7 @@ body
     text-decoration: none;
     font-size: 13px;
 }
-.header_buttons img ,.logout_button img
+.header_buttons img ,.logoutButton img
 {
     height: 50%;
 }
@@ -168,7 +168,7 @@ body
     color: #337AB7;
     text-decoration: none;
 }
-.error_message
+.errorMessage
 {
     color: #fd0202;
     font-size: 12px;

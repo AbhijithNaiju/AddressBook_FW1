@@ -1,4 +1,4 @@
 component extends="framework.one"{
-     this.datasource = "addressBook"
+     this.datasource = "addressBookFW1"
      this.sessionManagement = true
 }

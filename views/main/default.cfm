@@ -1,69 +1,271 @@
-<cfdump  var="#rc#">
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link rel="stylesheet" href="css/default.css">
-        <link rel="stylesheet" href="css/bootstrap.min.css">
-        <title>Login</title>
-    </head>
-    <body>
+<cfdump  var="#session#">
+<body>
+    <main class="main">
         <div class="header">
-            <a href="" class="logo">
-                <img src="assets/images/contact_book_logo.png" alt="Image not found">
-                <span>ADDRESS BOOK</span>
-            </a>
-            <div class="header_buttons">
-                <a href="./signup.cfm">
-                    <img src="assets/images/user_icon.png" alt="Image not found">
-                    Sign Up
+            <cfoutput>
+                <a href="#buildURL('main')#" class="logo">
+                    <img src="assets/images/contact_book_logo.png" alt="Image not found">
+                    <span>ADDRESS BOOK</span>
                 </a>
-                <a href="./login.cfm">
-                    <img src="assets/images/login-2.png" alt="Image not found">
-                    Login
-                </a>
+            </cfoutput>
+            <div class="logoutButton">
+                <button onclick="logout()">
+                    <img src="assets/images/logout.png" alt="Image not found">
+                    Logout
+                </button>
             </div>
         </div>
-        <main class="main">
-            <div class="main_body">
-                <div class="form_container">
-                    <div class="form_left">
-                        <img src="assets/images/contact_book_logo.png" alt="Image not found">
-                    </div>
-                    <form method="post" class="form_right">
-                        <div class="form_heading">
-                            LOGIN
-                        </div>
-                        <input type="text" placeholder="Email Id" name = "emailId" class="input_fields" id="userName">
-                        <div id="userNameError" class="error_message"></div>
+        <div class="homeBody">
+            <div class="homeElements">
+                <div class="profileBox">
+                    <cfoutput>
+                        <cfif len(rc.userDetails.profileImage)>
+                            <cfset local.userProfileImage = rc.userDetails.profileImage>
+                        <cfelse>
+                            <cfset local.userProfileImage = "l60Hf.png">
+                        </cfif>
+                        <img src="assets/contactPictures/#local.userProfileImage#" alt="image not found">
+                        <div class="profileName">#rc.userDetails.fullName#</div>
+                    </cfoutput>
+                    <button 
+                        onclick="openEditModal(this)" 
+                        data-bs-toggle="modal" 
+                        data-bs-target="#editModal" 
+                        value=""
+                        class = "createButton"
+                    >
+                        CREATE CONTACT
+                    </button>
+                </div>
 
-                        <input type="password" placeholder="Password" name="password" class="input_fields" id="password">                    
-                        <div id="passwordError" class="error_message"></div>
+                <div class="contactListContainer" id="contactList">
+                    <table class="contactList">
+                        <tr class="contactListHeading">
+                            <th class="listProfile">
 
-                        <input type="submit" onclick="loginValidate(event)" class="submit_btn" name="loginButton" value="LOGIN">
+                            </th>
+                            <th class="list_name">
+                                NAME
+                            </th>
+                            <th class="listEmail">
+                                EMAIL ID
+                            </th>
+                            <th class="listPhone">
+                                PHONE NUMBER
+                            </th>
+                            <th class="listButton">
+                                
+                            </th>
+                        </tr>
 
-
-                        <div class="sign_options">
-                            <span >
-                                Or Sign in Using
-                            </span>
-                            <div>
-                                <a href><img src="assets/images/facebook.png" alt="Image not found"></a>
-                                <cfoutput>
-                                    <a href="#buildURL('main.home')#"><img src="assets/images/Google.png" alt="Image not found"></a>
-                                </cfoutput>
-
-                            </div>
-                        </div>
-                        <div class="register_link">
-                            Don't have an account? <a href="signup.cfm">Register here</a> 
-                        </div>
-                    </form>
+                        <cfloop query="rc.contactList">
+                            <cfoutput>
+                                <tr class="contactListItem">
+                                    <td class="listProfile">
+                                        <cfif len(rc.contactList.profileImage)>
+                                            <cfset variables.contactProfileImage = contactItem.getprofileImage()>
+                                        <cfelse>
+                                            <cfset variables.contactProfileImage = "./Assets/contactPictures/l60Hf.png">
+                                        </cfif>
+                                        <img src="#variables.contactProfileImage#" alt="Image not found">
+                                    </td>
+                                    <td class="listName">
+                                        #rc.contactList.firstName# #rc.contactList.lastName#
+                                    </td>
+                                    <td class="listEmail">
+                                        #rc.contactList.emailId#
+                                    </td>
+                                    <td class="listPhone">
+                                        #rc.contactList.phoneNumber#
+                                    </td>
+                                    <td class="listButton">
+                                        <button type="button" 
+                                                value="#rc.contactList.contactId#" 
+                                                onclick="openEditModal(this)" 
+                                                class = "contactButtons">
+                                            EDIT
+                                        </button>
+                                        <button type="button" 
+                                                value="#rc.contactList.contactId#" 
+                                                onclick="deleteContact(this)" 
+                                                class = "contactButtons">
+                                            DELETE
+                                        </button>
+                                        <button type="button" 
+                                                value="#rc.contactList.contactId#" 
+                                                onclick="openViewModal(this)" 
+                                                class = "contactButtons">
+                                            VIEW
+                                        </button>
+                                    </td>
+                                </tr>
+                            </cfoutput>
+                        </cfloop>
+                    </table>
                 </div>
             </div>
-        </main>
-        <script src="./JS/Jquery/jquery-3.7.1.js"></script>
-        <script src="./JS/index.js"></script>
-    </body>
-</html>
+        </div>
+    </main>
+    <div class="modal" id="editModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-scrollable modal-lg">
+        <form 
+            method="post" 
+            class="" 
+            id="createForm" 
+            enctype="multipart/form-data" 
+            autocomplete
+        >
+            <div class="modal-content">
+                <div class="modal-body d-flex">
+                    <div class = "editFormBody">
+                        <div class="modalHeading" id="modalHeading"></div>
+
+                        <div class="modalSubHeadng">
+                            Personal contact
+                        </div>
+                    
+                        <div class="editModalElement">
+                            <div class="width_20">
+                                <label for="">Title *</label>
+                                <select class="formElement" id="title" name="title">
+                                    <option value=""></option>
+                                    <option value="Mr">Mr</option>
+                                    <option value="Mrs">Mrs</option>
+                                </select>
+                                <div class="errorMessage" id="titleError"></div>
+                            </div>
+                            <div class="width_30">
+                                <label for="">First name *</label>
+                                <input type="text" placeholder=" First name" class="formElement" id="firstName" name="firstName">
+                                <div class="errorMessage" id="firstNameError"></div>
+                            </div>
+                            <div class="width_30">
+                                <label for="">Last name *</label>
+                                <input type="text" placeholder=" Last name" class="formElement" id="lastName" name="lastName">
+                                <div class="errorMessage" id="lastNameError"></div>
+                            </div>
+                        </div>
+
+                        <div class="editModalElement">
+                            <div class="width_45">
+                                <label for="">Gender *</label>
+                                <select class="formElement" id="gender" name="gender">
+                                    <option value=""></option>
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                </select>
+                                <div class="errorMessage" id="genderError"></div>
+                            </div>
+                            <div class="width_45">
+                                <label for="">Role *</label>
+                                <select class="selectpicker" multiple data-live-search="true" required id="role" name="role">
+                                    <!--- <cfoutput>
+                                        <cfloop query="contactRoles">
+                                            <option value="#contactRoles.roleId#">#contactRoles.name#</option>
+                                        </cfloop>
+                                    </cfoutput> --->
+                                </select>
+                                <div class="errorMessage" id="roleError"></div>
+                            </div>
+                        </div>
+
+                        <div class="editModalElement">
+                            <div class="width_45">
+                                <label for="">Upload Photo *</label>
+                                <input type="file" class="formElement" id="profileImage" name="profileImage">
+                                <input type="hidden" name="profileDefault" id="profileDefault">
+                                <div class="errorMessage" id="profileImageError"></div>
+                            </div>
+                            <div class="width_45">
+                                <label for="">Date of Birth *</label>
+                                <cfoutput>
+                                    <input type="date" class="formElement" id="dateOfBirth" name="dateOfBirth" max="#dateformat(now(),"yyyy-mm-dd")#">
+                                </cfoutput>
+                                <div class="errorMessage" id="dateOfBirthError"></div>
+                            </div>
+                        </div>
+                        <div class="modalSubHeadng">
+                            Contact details
+                        </div>
+
+                        <div class="editModalElement">
+                            <div class="width_45">
+                                <label for="">Address *</label>
+                                <input type="text" placeholder=" Address" class="formElement" name="address" id="address">
+                                <div class="errorMessage" id="addressError"></div>
+                            </div>
+                            <div class="width_45">
+                                <label for="">Street *</label>
+                                <input type="text" placeholder=" Street Name" class="formElement" id="streetName" name="streetName">
+                                <div class="errorMessage" id="streetNameError"></div>
+                            </div>
+                        </div>
+
+                        <div class="editModalElement">
+                        <div class="width_45">
+                            <label for="">Pincode *</label>
+                                <input type="text" placeholder=" Pincode" class="formElement" id="pincode" name="pincode">
+                                <div class="errorMessage" id="pincodeError"></div>
+                            </div>
+                            <div class="width_45">
+                                <label for="">District *</label>
+                                <input type="text" placeholder=" District" class="formElement" id="district" name="district">
+                                <div class="errorMessage" id="districtError"></div>
+                            </div>
+                        </div>
+
+                        <div class="editModalElement">
+                            <div class="width_45">
+                                <label for="">State *</label>
+                                <input type="text" placeholder=" State" class="formElement" name="state" id="state">
+                                <div class="errorMessage" id="stateError"></div>
+                            </div>
+                            <div class="width_45">
+                                <label for="">Country *</label>
+                                <input type="text" placeholder=" Country" class="formElement" name="country" id="country">
+                                <div class="errorMessage" id="countryError"></div>
+                            </div>
+                        </div>
+
+                        <div class="editModalElement">
+                            <div class="width_45">
+                                <label for="">Phone *</label>
+                                <input type="text" placeholder=" Phone" class="formElement" name="phoneNumber" id="phoneNumber">
+                                <div class="errorMessage" id="phoneNumberError"></div>
+
+                            </div>
+                            <div class="width_45">
+                                <label for="">Email *</label>
+                                <input type="text" placeholder="Email" class="formElement" name="email" id="email">
+                                <div class="errorMessage" id="emailError"></div>
+                            </div>
+                        </div>
+                        <div class="errorMessage" id="editModalError"></div>
+
+                    </div>
+                    <div class="editFormImage">
+                        <img src="assets/contactPictures/l60Hf.png" id="profileImageEdit" alt="Image not found">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button 
+                        type="button" 
+                        class="btn btn-secondary" 
+                        data-bs-dismiss="modal"
+                        onclick="closeEditModal()"
+                    >
+                        Close
+                    </button>
+                    <button 
+                        type="button" 
+                        class="btn btn-primary"
+                        onclick="submitEditModal(this)"
+                    >
+                        Save changes
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+    
+</body>
