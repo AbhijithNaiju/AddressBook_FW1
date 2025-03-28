@@ -1,4 +1,3 @@
-<cfdump  var="#rc#">
 <body>
     <div class="header">
         <a href="" class="logo">

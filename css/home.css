@@ -21,30 +21,12 @@ body{
 }
 .homeElements
 {
-    width: 83%;
+    width: 85%;
     height: 90%;
     margin-top: 1.5%;
     border-radius: 5px;
     display: flex;
     justify-content: space-between;
-}
-.printOptions
-{
-    margin: 0 5% 0 auto;
-    display: flex;
-    align-items: center;
-    width: 12%;
-    justify-content: space-between;
-}
-.printOptions button
-{
-    background: none;
-    border: none;
-    height: 50%;
-}
-.printOptions button img
-{
-    height: 100%;
 }
 .profileBox
 {
@@ -53,7 +35,7 @@ body{
     flex-direction: column;
     align-items: center;
     justify-content: space-around;
-    width: 15.5%;
+    width: 18%;
     height: fit-content;
     min-height: 40vh;
     border-radius: 3px;
@@ -315,7 +297,7 @@ body{
 }
 .contactListContainer
 {
-    width: 83%;
+    width: 80%;
     overflow-y: scroll;
 }
 .openExcel

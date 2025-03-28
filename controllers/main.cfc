@@ -1,6 +1,7 @@
 component accessors=true{
     property addressService;
     property userService;
+
     function default( struct rc ) {
         if(structKeyExists(session, "userId")){
             rc.contactList = variables.addressService.contactList(userId=session.userId)
@@ -23,14 +24,5 @@ component accessors=true{
                 rc.error = local.loginResult.error;
             }
         }
-    }
-/*     remote struct function getRoles()(returnFormat="JSON"){
-        local.roles=variables.addressService.getAllRoles();
-        return local.roles
-    } */
-    remote struct function logout()returnFormat="JSON"{
-        structClear(session);
-        local.resultStruct["success"]=true;
-        return local.resultStruct;
     }
 }

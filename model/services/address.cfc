@@ -5,32 +5,28 @@
 
         <cfquery name = "local.qryContactDetails">
              SELECT 
-                <cfif LEN(arguments.userId)>
-                    CD.fldPhoneNumber AS phoneNumber,
+                <cfif LEN(arguments.contactId)>
                     CD.fldTitle AS title,
                     CD.fldGender AS gender,
                     CD.fldDOB AS DOB,
-                    CD.fldProfileImage AS profileImage,
                     CD.fldAddress AS address,
                     CD.fldStreetName AS streetName,
                     CD.fldDistrict AS district,
                     CD.fldSTATE AS STATE,
                     CD.fldCountry AS country,
                     CD.fldPincode AS pincode,
-                    GROUP_CONCAT(CR.fldRoleId) AS roleIds,
-                    GROUP_CONCAT(R.fldName) AS roleNames,
                 </cfif>
                 CD.fldContact_Id AS contactId,
                 CD.fldFirstName AS firstName,
                 CD.fldLastName AS lastName,
-                CD.fldEmailId AS emailId
+                CD.fldEmailId AS emailId,
+                CD.fldPhoneNumber AS phoneNumber,
+                CD.fldProfileImage AS profileImage
             FROM 
                 tblContactDetails AS CD
-                LEFT JOIN tblContactRoles AS CR ON CD.fldContact_Id = CR.fldContactId
-                LEFT JOIN tblRoles AS R ON R.fldRole_ID = CR.fldRoleId
             WHERE 
                 <cfif len(arguments.contactId)>
-                    CD.fldContactId = <cfqueryparam value = '#arguments.contactId#' cfsqltype = "integer">
+                    CD.fldContact_ID = <cfqueryparam value = '#arguments.contactId#' cfsqltype = "integer">
                 <cfelseif len(arguments.userId)>
                     CD.fldUserId = <cfqueryparam value = '#arguments.userId#' cfsqltype = "integer">
                 </cfif>
@@ -55,64 +51,102 @@
 
         <cfreturn local.qryContactDetails>
     </cffunction>
-    <!---     Get all roles for from role table --->
-    <cffunction  name="getAllRoles" returntype="query">
-        <cfquery name = "local.contactRoles">
+
+    <cffunction name = "isEmailExist" returntype = "struct">
+        <cfargument name = "email" type = "string" required = "true">
+        <cfargument name = "userId" type = "integer" required = "true">
+        <cfargument name = "contactId" type = "integer" required = "false" default="">
+
+        <cfset local.resultStruct = structNew()>
+        <cfquery name="local.qryEmailInContacts" >
             SELECT 
-                R.fldRoleId AS role,
-                R.fldName AS name
+                count(fldemailId) AS emailCount
             FROM 
-                tblRoles R;
-        </cfquery>
-        <cfreturn local.contactRoles>
-    </cffunction>
-<!--- component { 
-    public query function contactList(any userId) {
-        qryContactDetails = queryExecute(
-            "SELECT 
-                CD.contactId,
-                CD.title,
-                CD.firstName,
-                CD.lastName,
-                CD.gender,
-                CD.DOB,
-                CD.profileImage,
-                CD.address,
-                CD.streetName,
-                CD.district,
-                CD.STATE,
-                CD.country,
-                CD.pincode,
-                CD.emailId,
-                CD.phoneNumber,
-                STRING_AGG(CR.roleId, ',') AS roleIds,
-                STRING_AGG(r.name, ',') AS roleNames
-            FROM 
-                contactDetails AS CD
-                LEFT JOIN contactRoles AS CR ON CD.contactId = CR.contactId
-                LEFT JOIN roles AS r ON r.roleId = CR.roleId
+                tblContactDetails
             WHERE 
-                CD._CReatedBy = :CReatedBy
-                AND CD.active = 1
-                GROUP BY 
-                    CD.contactId,
-                    CD.title,
-                    CD.firstName,
-                    CD.lastName,
-                    CD.gender,
-                    CD.DOB,
-                    CD.profileImage,
-                    CD.address,
-                    CD.streetName,
-                    CD.district,
-                    CD.STATE,
-                    CD.country,
-                    CD.pincode,
-                    CD.emailId,
-                    CD.phoneNumber;",
-                {CReatedBy = { value = arguments.userId,cfsqltype = 'INTEGER'}}
-        )
-        return qryContactDetails;
-    } 
-} --->
+                fldActive = 1
+                AND fldUserId = <cfqueryparam value = '#arguments.userId#' cfsqltype = "bigint">
+                AND fldemailId = <cfqueryparam value = '#arguments.email#' cfsqltype = "varchar">
+                <cfif len(arguments.contactId)>
+                    AND fldContact_ID != <cfqueryparam value = '#arguments.contactId#' cfsqltype = "bigint">
+                </cfif>;
+        </cfquery>
+        <cfif local.qryEmailInContacts.emailCount>
+            <cfset local.resultStruct["isEmailExist"] = true>
+        <cfelse>
+            <cfset local.resultStruct["isEmailExist"] = false>
+        </cfif>
+
+        <cfreturn local.resultStruct>
+    </cffunction>
+    <cffunction  name="addOrEditContact">
+        <cfargument name = "title" type = "string" required = "true">
+        <cfargument name = "userId" type = "integer" required = "true">
+        <cfargument name = "firstName" type = "string" required = "true">
+        <cfargument name = "lastName" type = "string" required = "true">
+        <cfargument name = "gender" type = "string" required = "true">
+        <cfargument name = "dateOfBirth" required = "true">
+        <cfargument name = "address" type = "string" required = "true">
+        <cfargument name = "streetName" type = "string" required = "true">
+        <cfargument name = "pincode" type = "string" required = "true">
+        <cfargument name = "district" type = "string" required = "true">
+        <cfargument name = "state" type = "string" required = "true">
+        <cfargument name = "country" type = "string" required = "true">
+        <cfargument name = "email" type = "string" required = "true">
+        <cfargument name = "phoneNumber" type = "string" required = "true">
+        <cfargument name = "profileImage" required = "false">
+        <cfargument name = "profileDefault" type = "string" required = "true">
+        <cfargument name = "editContactId" type = "string" required = "true">
+
+        <!--- <cfdump  var="#arguments#"> --->
+
+<!---         <cfset local.uploadDirectory = "../Assets/contactPictures/">
+
+        <cfif structKeyExists(arguments, "profileImage") && len(arguments.profileImage)>
+            <cffile action="upload"
+                    destination="#expandPath(local.uploadDirectory)#"
+                    nameconflict="makeunique"
+                    result="fileDetails">
+            <cfset local.imageSrc = local.uploadDirectory & fileDetails.serverfile>
+        <cfelseif structKeyExists(arguments,"profileDefault")>
+            <cfset local.imageSrc = arguments.profileDefault>
+        <cfelse>
+            <cfset local.imageSrc = "">
+        </cfif> --->
+            <cfset local.imageSrc = "">
+        
+        <cfset local.resultStruct = structNew()>
+        <cfset local.updateDate = dateformat(now(),"yyyy-mm-dd")>
+
+        <cftry>
+            <cfquery>
+                UPDATE 
+                    tblContactDetails
+                SET 
+                    fldTitle = <cfqueryparam value = '#arguments["title"]#' cfsqltype = "varchar">,
+                    fldFirstName = <cfqueryparam value = '#arguments["firstName"]#' cfsqltype = "varchar">,
+                    fldLastName = <cfqueryparam value = '#arguments["lastName"]#' cfsqltype = "varchar">,
+                    fldGender = <cfqueryparam value = '#arguments["gender"]#' cfsqltype = "varchar">,
+                    fldDOB = <cfqueryparam value = '#arguments["dateOfBirth"]#' cfsqltype = "date">,
+                    fldProfileImage = <cfqueryparam value = '#local.imageSrc#' cfsqltype = "varchar">,
+                    fldAddress = <cfqueryparam value = '#arguments["address"]#' cfsqltype = "varchar">,
+                    fldStreetName = <cfqueryparam value = '#arguments["streetName"]#' cfsqltype = "varchar">,
+                    fldDistrict = <cfqueryparam value = '#arguments["district"]#' cfsqltype = "varchar">,
+                    fldState = <cfqueryparam value = '#arguments["state"]#' cfsqltype = "varchar">,
+                    fldCountry = <cfqueryparam value = '#arguments["country"]#' cfsqltype = "varchar">,
+                    fldPincode = <cfqueryparam value = '#arguments["pincode"]#' cfsqltype = "varchar">,
+                    fldEmailId = <cfqueryparam value = '#arguments["email"]#' cfsqltype = "varchar">,
+                    fldPhoneNumber = <cfqueryparam value = '#arguments["phoneNumber"]#' cfsqltype = "varchar">,
+                    fldUpdatedBy = <cfqueryparam value = '#session.userId#' cfsqltype = " bigint">,
+                    fldUpdatedOn = <cfqueryparam value = '#local.updateDate#' cfsqltype = "date">
+                WHERE
+                    fldContact_ID = <cfqueryparam value = '#arguments["editContactId"]#' cfsqltype = "bigint">
+                    AND fldUserId = <cfqueryparam value = '#session.userId#' cfsqltype = "bigint">;
+            </cfquery>
+            <cfcatch type="any">
+                <cfset local.resultStruct["error"] = "Error occured while updating">
+            </cfcatch>
+        </cftry>
+        <cfreturn local.resultStruct>
+    </cffunction>
 </cfcomponent>

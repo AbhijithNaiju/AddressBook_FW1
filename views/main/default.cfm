@@ -1,4 +1,3 @@
-<cfdump  var="#session#">
 <body>
     <main class="main">
         <div class="header">
@@ -31,8 +30,8 @@
                         onclick="openEditModal(this)" 
                         data-bs-toggle="modal" 
                         data-bs-target="#editModal" 
-                        value=""
                         class = "createButton"
+                        value=""
                     >
                         CREATE CONTACT
                     </button>
@@ -44,7 +43,7 @@
                             <th class="listProfile">
 
                             </th>
-                            <th class="list_name">
+                            <th class="listName">
                                 NAME
                             </th>
                             <th class="listEmail">
@@ -65,7 +64,7 @@
                                         <cfif len(rc.contactList.profileImage)>
                                             <cfset variables.contactProfileImage = contactItem.getprofileImage()>
                                         <cfelse>
-                                            <cfset variables.contactProfileImage = "./Assets/contactPictures/l60Hf.png">
+                                            <cfset variables.contactProfileImage = "assets/contactPictures/l60Hf.png">
                                         </cfif>
                                         <img src="#variables.contactProfileImage#" alt="Image not found">
                                     </td>
@@ -80,21 +79,29 @@
                                     </td>
                                     <td class="listButton">
                                         <button type="button" 
-                                                value="#rc.contactList.contactId#" 
-                                                onclick="openEditModal(this)" 
-                                                class = "contactButtons">
+                                            value="#rc.contactList.contactId#" 
+                                            onclick="openEditModal(this)" 
+                                            class = "contactButtons"
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="##editModal" 
+                                        >
                                             EDIT
                                         </button>
                                         <button type="button" 
-                                                value="#rc.contactList.contactId#" 
-                                                onclick="deleteContact(this)" 
-                                                class = "contactButtons">
+                                            value="#rc.contactList.contactId#" 
+                                            onclick="deleteContact(this)" 
+                                            class = "contactButtons"
+                                        >
                                             DELETE
                                         </button>
-                                        <button type="button" 
-                                                value="#rc.contactList.contactId#" 
-                                                onclick="openViewModal(this)" 
-                                                class = "contactButtons">
+                                        <button 
+                                            type="button" 
+                                            value="#rc.contactList.contactId#" 
+                                            onclick="openViewModal(this)" 
+                                            class = "contactButtons"
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="##viewModal" 
+                                        >
                                             VIEW
                                         </button>
                                     </td>
@@ -107,21 +114,20 @@
         </div>
     </main>
     <div class="modal" id="editModal" tabindex="-1">
-        <div class="modal-dialog modal-dialog-scrollable modal-lg">
         <form 
             method="post" 
-            class="" 
+            class="modal-dialog modal-dialog-scrollable modal-lg" 
             id="createForm" 
             enctype="multipart/form-data" 
             autocomplete
         >
             <div class="modal-content">
-                <div class="modal-body d-flex">
+                <div class="modal-body d-flex my-2">
                     <div class = "editFormBody">
                         <div class="modalHeading" id="modalHeading"></div>
 
                         <div class="modalSubHeadng">
-                            Personal contact
+                            Personal details
                         </div>
                     
                         <div class="editModalElement">
@@ -157,31 +163,20 @@
                                 <div class="errorMessage" id="genderError"></div>
                             </div>
                             <div class="width_45">
-                                <label for="">Role *</label>
-                                <select class="selectpicker" multiple data-live-search="true" required id="role" name="role">
-                                    <!--- <cfoutput>
-                                        <cfloop query="contactRoles">
-                                            <option value="#contactRoles.roleId#">#contactRoles.name#</option>
-                                        </cfloop>
-                                    </cfoutput> --->
-                                </select>
-                                <div class="errorMessage" id="roleError"></div>
-                            </div>
-                        </div>
-
-                        <div class="editModalElement">
-                            <div class="width_45">
-                                <label for="">Upload Photo *</label>
-                                <input type="file" class="formElement" id="profileImage" name="profileImage">
-                                <input type="hidden" name="profileDefault" id="profileDefault">
-                                <div class="errorMessage" id="profileImageError"></div>
-                            </div>
-                            <div class="width_45">
                                 <label for="">Date of Birth *</label>
                                 <cfoutput>
                                     <input type="date" class="formElement" id="dateOfBirth" name="dateOfBirth" max="#dateformat(now(),"yyyy-mm-dd")#">
                                 </cfoutput>
                                 <div class="errorMessage" id="dateOfBirthError"></div>
+                            </div>
+                        </div>
+
+                        <div class="editModalElement">
+                            <div class="w-100">
+                                <label for="">Upload Photo *</label>
+                                <input type="file" class="formElement" id="profileImage" name="profileImage">
+                                <input type="hidden" name="profileDefault" id="profileDefault">
+                                <div class="errorMessage" id="profileImageError"></div>
                             </div>
                         </div>
                         <div class="modalSubHeadng">
@@ -252,12 +247,13 @@
                         type="button" 
                         class="btn btn-secondary" 
                         data-bs-dismiss="modal"
-                        onclick="closeEditModal()"
+                        id = "closeEditModal"
                     >
                         Close
                     </button>
                     <button 
                         type="button" 
+                        id="submitEditModalBtn"
                         class="btn btn-primary"
                         onclick="submitEditModal(this)"
                     >
@@ -267,5 +263,59 @@
             </div>
         </form>
     </div>
-    
+    <div class="modal" id="viewModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-scrollable modal-lg">
+            <div class="modal-content">
+                <div class="d-flex modal-body">
+                    <div class="editFormBody"  enctype="multipart/form-data">
+                        <div class="modalHeading">
+                            CONTACT DETAILS
+                        </div>
+                        <div id="viewModalBody">
+                            <div class="contactDetails">
+                                <div class="contactItemName">Name</div>
+                                <div class="contactItemValue" id="viewContactName"></div>
+                            </div>
+                            <div class="contactDetails">
+                                <div class="contactItemName">Gender</div>
+                                <div class="contactItemValue" id="viewContactGender"></div>
+                            </div>
+                            <div class="contactDetails">
+                                <div class="contactItemName">Date of birth</div>
+                                <div class="contactItemValue" id="viewContactDateOfBirth"></div>
+                            </div>
+                            <div class="contactDetails">
+                                <div class="contactItemName">Address</div>
+                                <div class="contactItemValue" id="viewContactAddress"></div>
+                            </div>
+                            <div class="contactDetails">
+                                <div class="contactItemName">Pincode</div>
+                                <div class="contactItemValue" id="viewContactPincode"></div>
+                            </div>
+                            <div class="contactDetails">
+                                <div class="contactItemName">Email Id</div>
+                                <div class="contactItemValue" id="viewContactEmailId"></div>
+                            </div>
+                            <div class="contactDetails">
+                                <div class="contactItemName">Phone Number</div>
+                                <div class="contactItemValue" id="viewContactPhoneNumber"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="viewFormImage">
+                        <img src="assets/contactPictures/l60Hf.png" alt="Image not found" id = "viewProfileImage">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button 
+                        type="button" 
+                        class="btn btn-secondary" 
+                        data-bs-dismiss="modal"
+                    >
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
