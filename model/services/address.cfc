@@ -79,7 +79,8 @@
 
         <cfreturn local.resultStruct>
     </cffunction>
-    <cffunction  name="addOrEditContact">
+
+    <cffunction  name="addOrEditContact" returntype="struct">
         <cfargument name = "title" type = "string" required = "true">
         <cfargument name = "userId" type = "integer" required = "true">
         <cfargument name = "firstName" type = "string" required = "true">
@@ -95,58 +96,111 @@
         <cfargument name = "email" type = "string" required = "true">
         <cfargument name = "phoneNumber" type = "string" required = "true">
         <cfargument name = "profileImage" required = "false">
-        <cfargument name = "profileDefault" type = "string" required = "true">
-        <cfargument name = "editContactId" type = "string" required = "true">
+        <cfargument name = "editContactId" type = "integer" required = "true">
 
-        <!--- <cfdump  var="#arguments#"> --->
-
-<!---         <cfset local.uploadDirectory = "../Assets/contactPictures/">
-
-        <cfif structKeyExists(arguments, "profileImage") && len(arguments.profileImage)>
-            <cffile action="upload"
-                    destination="#expandPath(local.uploadDirectory)#"
-                    nameconflict="makeunique"
-                    result="fileDetails">
-            <cfset local.imageSrc = local.uploadDirectory & fileDetails.serverfile>
-        <cfelseif structKeyExists(arguments,"profileDefault")>
-            <cfset local.imageSrc = arguments.profileDefault>
-        <cfelse>
-            <cfset local.imageSrc = "">
-        </cfif> --->
-            <cfset local.imageSrc = "">
-        
         <cfset local.resultStruct = structNew()>
-        <cfset local.updateDate = dateformat(now(),"yyyy-mm-dd")>
-
-        <cftry>
-            <cfquery>
-                UPDATE 
-                    tblContactDetails
-                SET 
-                    fldTitle = <cfqueryparam value = '#arguments["title"]#' cfsqltype = "varchar">,
-                    fldFirstName = <cfqueryparam value = '#arguments["firstName"]#' cfsqltype = "varchar">,
-                    fldLastName = <cfqueryparam value = '#arguments["lastName"]#' cfsqltype = "varchar">,
-                    fldGender = <cfqueryparam value = '#arguments["gender"]#' cfsqltype = "varchar">,
-                    fldDOB = <cfqueryparam value = '#arguments["dateOfBirth"]#' cfsqltype = "date">,
-                    fldProfileImage = <cfqueryparam value = '#local.imageSrc#' cfsqltype = "varchar">,
-                    fldAddress = <cfqueryparam value = '#arguments["address"]#' cfsqltype = "varchar">,
-                    fldStreetName = <cfqueryparam value = '#arguments["streetName"]#' cfsqltype = "varchar">,
-                    fldDistrict = <cfqueryparam value = '#arguments["district"]#' cfsqltype = "varchar">,
-                    fldState = <cfqueryparam value = '#arguments["state"]#' cfsqltype = "varchar">,
-                    fldCountry = <cfqueryparam value = '#arguments["country"]#' cfsqltype = "varchar">,
-                    fldPincode = <cfqueryparam value = '#arguments["pincode"]#' cfsqltype = "varchar">,
-                    fldEmailId = <cfqueryparam value = '#arguments["email"]#' cfsqltype = "varchar">,
-                    fldPhoneNumber = <cfqueryparam value = '#arguments["phoneNumber"]#' cfsqltype = "varchar">,
-                    fldUpdatedBy = <cfqueryparam value = '#session.userId#' cfsqltype = " bigint">,
-                    fldUpdatedOn = <cfqueryparam value = '#local.updateDate#' cfsqltype = "date">
-                WHERE
-                    fldContact_ID = <cfqueryparam value = '#arguments["editContactId"]#' cfsqltype = "bigint">
-                    AND fldUserId = <cfqueryparam value = '#session.userId#' cfsqltype = "bigint">;
-            </cfquery>
+        <cfset local.currentDate = dateformat(now(),"yyyy-mm-dd")>
+        <cfif val(arguments.editContactId)>
+            <cftry>
+                <cfquery>
+                    UPDATE 
+                        tblContactDetails
+                    SET 
+                        fldTitle = <cfqueryparam value = '#arguments["title"]#' cfsqltype = "varchar">,
+                        fldFirstName = <cfqueryparam value = '#arguments["firstName"]#' cfsqltype = "varchar">,
+                        fldLastName = <cfqueryparam value = '#arguments["lastName"]#' cfsqltype = "varchar">,
+                        fldGender = <cfqueryparam value = '#arguments["gender"]#' cfsqltype = "varchar">,
+                        fldDOB = <cfqueryparam value = '#arguments["dateOfBirth"]#' cfsqltype = "date">,
+                        fldProfileImage = <cfqueryparam value = '#arguments.profileImage#' cfsqltype = "varchar">,
+                        fldAddress = <cfqueryparam value = '#arguments["address"]#' cfsqltype = "varchar">,
+                        fldStreetName = <cfqueryparam value = '#arguments["streetName"]#' cfsqltype = "varchar">,
+                        fldDistrict = <cfqueryparam value = '#arguments["district"]#' cfsqltype = "varchar">,
+                        fldState = <cfqueryparam value = '#arguments["state"]#' cfsqltype = "varchar">,
+                        fldCountry = <cfqueryparam value = '#arguments["country"]#' cfsqltype = "varchar">,
+                        fldPincode = <cfqueryparam value = '#arguments["pincode"]#' cfsqltype = "varchar">,
+                        fldEmailId = <cfqueryparam value = '#arguments["email"]#' cfsqltype = "varchar">,
+                        fldPhoneNumber = <cfqueryparam value = '#arguments["phoneNumber"]#' cfsqltype = "bigint">,
+                        fldUpdatedBy = <cfqueryparam value = '#arguments.userId#' cfsqltype = " bigint">,
+                        fldUpdatedOn = <cfqueryparam value = '#local.currentDate#' cfsqltype = "date">
+                    WHERE
+                        fldContact_ID = <cfqueryparam value = '#arguments["editContactId"]#' cfsqltype = "bigint">
+                        AND fldUserId = <cfqueryparam value = '#arguments.userId#' cfsqltype = "bigint">;
+                </cfquery>
+                <cfset local.resultStruct["success"] = true>
             <cfcatch type="any">
                 <cfset local.resultStruct["error"] = "Error occured while updating">
             </cfcatch>
-        </cftry>
+            </cftry>
+        <cfelse>
+            <cftry>
+                <cfquery result = "local.insertResult">
+                    INSERT INTO 
+                        tblContactDetails (
+                            fldTitle,
+                            fldFirstName,
+                            fldLastName,
+                            fldGender,
+                            fldDOB,
+                            fldProfileImage,
+                            fldAddress,
+                            fldStreetName,
+                            fldDistrict,
+                            fldState,
+                            fldCountry,
+                            fldPincode,
+                            fldEmailId,
+                            fldPhoneNumber,
+                            fldUserId,
+                            fldCreatedOn,
+                            fldActive
+                        )VALUES(
+                            <cfqueryparam value = '#arguments["title"]#' cfsqltype = "varchar">,
+                            <cfqueryparam value = '#arguments["firstName"]#' cfsqltype = "varchar">,
+                            <cfqueryparam value = '#arguments["lastName"]#' cfsqltype = "varchar">,
+                            <cfqueryparam value = '#arguments["gender"]#' cfsqltype = "varchar">,
+                            <cfqueryparam value = '#arguments["dateOfBirth"]#' cfsqltype = "varchar">,
+                            <cfqueryparam value = '#arguments.profileImage#' cfsqltype = "varchar">,
+                            <cfqueryparam value = '#arguments["address"]#' cfsqltype = "varchar">,
+                            <cfqueryparam value = '#arguments["streetName"]#' cfsqltype = "varchar">,
+                            <cfqueryparam value = '#arguments["district"]#' cfsqltype = "varchar">,
+                            <cfqueryparam value = '#arguments["state"]#' cfsqltype = "varchar">,
+                            <cfqueryparam value = '#arguments["country"]#' cfsqltype = "varchar">,
+                            <cfqueryparam value = '#arguments["pincode"]#' cfsqltype = "integer">,
+                            <cfqueryparam value = '#arguments["email"]#' cfsqltype = "varchar">,
+                            <cfqueryparam value = '#arguments["phoneNumber"]#' cfsqltype = "bigint">,
+                            <cfqueryparam value = '#arguments.userId#' cfsqltype = " bigint">,
+                            <cfqueryparam value = '#local.currentDate#' cfsqltype = "date">,
+                            1
+                        );
+                </cfquery>
+                <cfset local.resultStruct["success"] = true>
+            <cfcatch type="any">
+                <cfset local.resultStruct["error"] = "Error occured while inserting">
+            </cfcatch>
+            </cftry>
+        </cfif>
+
+        <cfreturn local.resultStruct>
+    </cffunction>
+
+    <cffunction  name="deleteContact" access="remote" returnformat = "plain">
+        <cfargument  name="contactId" type="integer" required = "true">
+        <cfargument  name="userId" type="integer" required = "true">
+
+        <cfset local.resultStruct = structNew()>
+        <cfquery>
+            UPDATE 
+                tblcontactDetails
+            SET 
+                fldActive = 0,
+                fldDeletedBy = <cfqueryparam value = '#arguments.userId#' cfsqltype = "integer">,
+                fldDeletedOn = <cfqueryparam value = '#dateformat(now(),"yyyy-mm-dd")#' cfsqltype = " date">
+            WHERE
+                fldContact_Id = <cfqueryparam value = '#arguments.contactId#' cfsqltype = "integer">
+                AND fldUserId = <cfqueryparam value = '#arguments.userId#' cfsqltype = "integer">;
+        </cfquery>
+        <cfset local.resultStruct["success"] = true>
+
         <cfreturn local.resultStruct>
     </cffunction>
 </cfcomponent>

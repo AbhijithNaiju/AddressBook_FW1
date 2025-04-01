@@ -23,7 +23,7 @@
                         <cfelse>
                             <cfset local.userProfileImage = "l60Hf.png">
                         </cfif>
-                        <img src="assets/contactPictures/#local.userProfileImage#" alt="image not found">
+                        <img src="assets/userPictures/#local.userProfileImage#" alt="image not found">
                         <div class="profileName">#rc.userDetails.fullName#</div>
                     </cfoutput>
                     <button 
@@ -37,8 +37,8 @@
                     </button>
                 </div>
 
-                <div class="contactListContainer" id="contactList">
-                    <table class="contactList">
+                <div class="contactListContainer">
+                    <table class="contactList" id="contactList">
                         <tr class="contactListHeading">
                             <th class="listProfile">
 
@@ -59,14 +59,18 @@
 
                         <cfloop query="rc.contactList">
                             <cfoutput>
-                                <tr class="contactListItem">
+                                <tr class="contactListItem" id="contactItem_#rc.contactList.contactId#">
                                     <td class="listProfile">
                                         <cfif len(rc.contactList.profileImage)>
-                                            <cfset variables.contactProfileImage = contactItem.getprofileImage()>
+                                            <cfset variables.contactProfileImage = rc.contactList.profileImage>
                                         <cfelse>
-                                            <cfset variables.contactProfileImage = "assets/contactPictures/l60Hf.png">
+                                            <cfset variables.contactProfileImage = "l60Hf.png">
                                         </cfif>
-                                        <img src="#variables.contactProfileImage#" alt="Image not found">
+                                        <img 
+                                            src="assets/contactPictures/#variables.contactProfileImage#" 
+                                            alt="Image not found"
+                                            class="profileImage"
+                                        >
                                     </td>
                                     <td class="listName">
                                         #rc.contactList.firstName# #rc.contactList.lastName#
@@ -135,19 +139,19 @@
                                 <label for="">Title *</label>
                                 <select class="formElement" id="title" name="title">
                                     <option value=""></option>
-                                    <option value="Mr">Mr</option>
+                                    <option value="Mr" selected>Mr</option>
                                     <option value="Mrs">Mrs</option>
                                 </select>
                                 <div class="errorMessage" id="titleError"></div>
                             </div>
                             <div class="width_30">
                                 <label for="">First name *</label>
-                                <input type="text" placeholder=" First name" class="formElement" id="firstName" name="firstName">
+                                <input type="text" value="aaa" placeholder=" First name" class="formElement" id="firstName" name="firstName">
                                 <div class="errorMessage" id="firstNameError"></div>
                             </div>
                             <div class="width_30">
                                 <label for="">Last name *</label>
-                                <input type="text" placeholder=" Last name" class="formElement" id="lastName" name="lastName">
+                                <input type="text" value="aaa" placeholder=" Last name" class="formElement" id="lastName" name="lastName">
                                 <div class="errorMessage" id="lastNameError"></div>
                             </div>
                         </div>
@@ -157,7 +161,7 @@
                                 <label for="">Gender *</label>
                                 <select class="formElement" id="gender" name="gender">
                                     <option value=""></option>
-                                    <option value="Male">Male</option>
+                                    <option value="Male" selected>Male</option>
                                     <option value="Female">Female</option>
                                 </select>
                                 <div class="errorMessage" id="genderError"></div>
@@ -165,7 +169,7 @@
                             <div class="width_45">
                                 <label for="">Date of Birth *</label>
                                 <cfoutput>
-                                    <input type="date" class="formElement" id="dateOfBirth" name="dateOfBirth" max="#dateformat(now(),"yyyy-mm-dd")#">
+                                    <input type="date" class="formElement" id="dateOfBirth" name="dateOfBirth" value="#dateformat(now(),"yyyy-mm-dd")#">
                                 </cfoutput>
                                 <div class="errorMessage" id="dateOfBirthError"></div>
                             </div>
@@ -186,12 +190,12 @@
                         <div class="editModalElement">
                             <div class="width_45">
                                 <label for="">Address *</label>
-                                <input type="text" placeholder=" Address" class="formElement" name="address" id="address">
+                                <input type="text" value="aaa" placeholder=" Address" class="formElement" name="address" id="address">
                                 <div class="errorMessage" id="addressError"></div>
                             </div>
                             <div class="width_45">
                                 <label for="">Street *</label>
-                                <input type="text" placeholder=" Street Name" class="formElement" id="streetName" name="streetName">
+                                <input type="text" value="aaa" placeholder=" Street Name" class="formElement" id="streetName" name="streetName">
                                 <div class="errorMessage" id="streetNameError"></div>
                             </div>
                         </div>
@@ -199,12 +203,12 @@
                         <div class="editModalElement">
                         <div class="width_45">
                             <label for="">Pincode *</label>
-                                <input type="text" placeholder=" Pincode" class="formElement" id="pincode" name="pincode">
+                                <input type="text" value="123456" placeholder=" Pincode" class="formElement" id="pincode" name="pincode">
                                 <div class="errorMessage" id="pincodeError"></div>
                             </div>
                             <div class="width_45">
                                 <label for="">District *</label>
-                                <input type="text" placeholder=" District" class="formElement" id="district" name="district">
+                                <input type="text" value="aaa" placeholder=" District" class="formElement" id="district" name="district">
                                 <div class="errorMessage" id="districtError"></div>
                             </div>
                         </div>
@@ -212,12 +216,12 @@
                         <div class="editModalElement">
                             <div class="width_45">
                                 <label for="">State *</label>
-                                <input type="text" placeholder=" State" class="formElement" name="state" id="state">
+                                <input type="text" value="aaa" placeholder=" State" class="formElement" name="state" id="state">
                                 <div class="errorMessage" id="stateError"></div>
                             </div>
                             <div class="width_45">
                                 <label for="">Country *</label>
-                                <input type="text" placeholder=" Country" class="formElement" name="country" id="country">
+                                <input type="text" value="aaa" placeholder=" Country" class="formElement" name="country" id="country">
                                 <div class="errorMessage" id="countryError"></div>
                             </div>
                         </div>
@@ -225,17 +229,17 @@
                         <div class="editModalElement">
                             <div class="width_45">
                                 <label for="">Phone *</label>
-                                <input type="text" placeholder=" Phone" class="formElement" name="phoneNumber" id="phoneNumber">
+                                <input type="text" value="1234567890" placeholder=" Phone" class="formElement" name="phoneNumber" id="phoneNumber">
                                 <div class="errorMessage" id="phoneNumberError"></div>
 
                             </div>
                             <div class="width_45">
                                 <label for="">Email *</label>
-                                <input type="text" placeholder="Email" class="formElement" name="email" id="email">
+                                <input type="text" value="aaa@ddd.com" placeholder="Email" class="formElement" name="email" id="email">
                                 <div class="errorMessage" id="emailError"></div>
                             </div>
                         </div>
-                        <div class="errorMessage" id="editModalError"></div>
+                        <div class="errorMessage text-center" id="editModalError"></div>
 
                     </div>
                     <div class="editFormImage">

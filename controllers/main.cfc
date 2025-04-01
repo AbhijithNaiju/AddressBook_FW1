@@ -3,12 +3,8 @@ component accessors=true{
     property userService;
 
     function default( struct rc ) {
-        if(structKeyExists(session, "userId")){
-            rc.contactList = variables.addressService.contactList(userId=session.userId)
-            rc.userDetails = variables.userService.getUserDetails(userId=session.userId)
-        }else{
-            location("index.cfm?action=main.login","false");
-        }
+        rc.contactList = variables.addressService.contactList(userId=session.userId)
+        rc.userDetails = variables.userService.getUserDetails(userId=session.userId)
     }
 
     function login( struct rc ) {

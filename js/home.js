@@ -6,7 +6,7 @@ $(document).ready(function(){
 
 function openEditModal(editId){
     $(".errorMessage").text('');
-    document.getElementById("profileImageEdit").src = "./assets/contactPictures/l60Hf.png";
+    document.getElementById("profileImageEdit").src = "assets/contactPictures/l60Hf.png";
     if(editId.value == ""){
         $("#modalHeading").text("CREATE CONTACT")
     }else{
@@ -35,8 +35,11 @@ function openEditModal(editId){
                     $("#phoneNumber").val(result.contactDetails.phoneNumber);
                     $("#email").val(result.contactDetails.emailId);
                     if((result.contactDetails.profileImage).length){
-                        document.getElementById("profileImageEdit").src = result.contactDetails.profileImage;
+                        imageFilename = result.contactDetails.profileImage;
+                    }else{
+                        imageFilename="l60Hf.png"
                     }
+                    document.getElementById("profileImageEdit").src = "assets/contactPictures/"+imageFilename;
                     $("#submitEditModalBtn").val(editId.value);
                 }else{
                     alert("Error ocuured while fetching data please try again");
@@ -74,9 +77,11 @@ function openViewModal(viewId)
                 $("#viewContactEmailId").text(result.contactDetails.emailId);
                 $("#viewContactPhoneNumber").text(result.contactDetails.phoneNumber);
                 if((result.contactDetails.profileImage).length){
-                    imageSrc="./assets/contactPictures/"+result.contactDetails.profileImage;
-                    document.getElementById("viewProfileImage").src = imageSrc;
+                    imageSrc=result.contactDetails.profileImage;
+                }else{
+                    imageSrc="l60Hf.png"
                 }
+                document.getElementById("viewProfileImage").src = "./assets/contactPictures/"+imageSrc;
             }else if(result.error){
                 alert("An error occured please reload the page and try again");
             }else{
@@ -229,7 +234,9 @@ function submitEditModal(contactId)
         var formElement = document.getElementById("createForm");
         var formData = new FormData(formElement);
         formData.append("action","jsFunctions.addOrEditContact")
-        formData.append("editContactId", contactId.value);
+        if(contactId.value){
+            formData.append("editContactId", contactId.value);
+        }
         $.ajax({
             type: "POST",
             url: "index.cfm",
@@ -238,19 +245,110 @@ function submitEditModal(contactId)
             contentType: false,
             success: function(result) {
                 if(result.error){
-                    $("#editModalError").text(editModalError);
+                    $("#editModalError").text(result.error);
                 }
                 if(result.emailError){
                     $("#emailError").text(result.emailError);
                     $("#email").focus();
                 }
-                else{
-                    // location.reload();
+                if(result.success){
+                    if(result.profileImage){
+                        newImageFilename="assets/contactPictures/"+result.profileImage;
+                    }else{
+                        newImageFilename="assets/contactPictures/l60Hf.png"
+                    }
+                    if(contactId.value){
+                        $("#contactItem_"+contactId.value).find(".listName").text(firstName+' '+lastName);
+                        $("#contactItem_"+contactId.value).find(".listEmail").text(email);
+                        $("#contactItem_"+contactId.value).find(".listPhone").text(phoneNumber);
+                        $("#contactItem_"+contactId.value).find(".profileImage").attr("src",+newImageFilename);
+                    }else{
+                        let contactItem=`
+                            <tr class="contactListItem" id="contactItem_${result.contactId}">
+                                <td class="listProfile">
+                                    <img src="${newImageFilename}" alt="Image not found" class="profileImage">
+                                </td>
+                                <td class="listName">
+                                    ${firstName+' '+lastName}
+                                </td>
+                                <td class="listEmail">
+                                    ${email}
+                                </td>
+                                <td class="listPhone">
+                                    ${phoneNumber}
+                                </td>
+                                <td class="listButton">
+                                    <button type="button" 
+                                        value="${result.contactId}" 
+                                        onclick="openEditModal(this)" 
+                                        class = "contactButtons"
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#editModal" 
+                                    >
+                                        EDIT
+                                    </button>
+                                    <button type="button" 
+                                        value="${result.contactId}" 
+                                        onclick="deleteContact(this)" 
+                                        class = "contactButtons"
+                                    >
+                                        DELETE
+                                    </button>
+                                    <button 
+                                        type="button" 
+                                        value="${result.contactId}" 
+                                        onclick="openViewModal(this)" 
+                                        class = "contactButtons"
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#viewModal" 
+                                    >
+                                        VIEW
+                                    </button>
+                                </td>
+                            </tr>
+                        `;
+                        $("#contactList").append(contactItem);
+                    }
+                    $("#editModal").modal("hide");
                 }
             }
         });
     }
 }
+
+function deleteContact(deleteId){
+    Swal.fire({
+        title: "Are you sure?",
+        text: "This contact will be removed from addressbokk.",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Remove"
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.ajax({
+                type:"POST",
+                url:"index.cfm",
+                data:{
+                    contactId:deleteId.value,
+                    action:"jsFunctions.deleteContact"
+                },
+                success: function(result) {
+                    if(result.success){
+                        deleteId.parentElement.parentElement.remove();
+                    }else{
+                        alert("An unexpected error occured")
+                    }
+                },
+                error:function(){
+                    alert("An error occured")
+                }
+            });
+        }
+    });
+}
+
 function logout(){
 	Swal.fire({
         title: "Are you sure?",
@@ -272,25 +370,4 @@ function logout(){
             });
         }
 	});
-}
-
-function deleteContact(deleteId){
-    if(confirm("Confirm delete"))
-        {
-            $.ajax({
-                type:"POST",
-                url:"./Components/addressBook.cfc?method=deleteContact",
-                data:{deleteId:deleteId.value},
-                success: function(result) {
-                    if(result)
-                    {
-                        deleteId.parentElement.parentElement.remove();
-                    }
-                },
-                error:function()
-                {
-                    alert("An error occured")
-                }
-            });
-        }
 }

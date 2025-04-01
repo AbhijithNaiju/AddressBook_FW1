@@ -44,8 +44,10 @@ component accessors="true"{
     }
 
     public string function addOrEditContact(required struct rc){
-         /* writeDump(rc)  */
-         local.isEmailCheck=variables.addressService.isEmailExist(
+        param name="rc.editContactId" default=0;
+        param name="rc.profileImage" default="";
+        param name="rc.profileDefault" default="";
+        local.isEmailCheck=variables.addressService.isEmailExist(
             email=rc.email,
             contactId=rc.editContactId,
             userId=session.userId
@@ -53,6 +55,19 @@ component accessors="true"{
         if(local.isEmailCheck.isEmailExist){
             local.resultStruct["emailError"]="Email already exists for another contact";
         }else{
+            local.uploadDirectory = "Assets/contactPictures/";
+
+            if(len(arguments.rc.profileImage)){
+                local.fileDetails=fileUpload(
+                    destination="#expandPath(local.uploadDirectory)#",
+                    onconflict="makeunique"
+                )
+                local.imageFileName = local.fileDetails.serverfile;
+            }else if(len(arguments.rc.profileDefault)){
+                local.imageFileName = arguments.rc.profileDefault;
+            }else{
+                local.imageFileName = "";
+            }
             local.resultStruct=variables.addressService.addOrEditContact(
                 userId=session.userId,
                 title = rc.title,
@@ -67,11 +82,30 @@ component accessors="true"{
                 country = rc.country,
                 phonenumber = rc.phonenumber,
                 pincode = rc.pincode,
-                profileimage = rc.profileimage,
-                profiledefault = rc.profiledefault,
+                profileimage = local.imageFileName,
                 email = rc.email,
-                editcontactid = rc.editcontactid
-            ); 
+                editcontactId = rc.editcontactId
+            );
+            if(structKeyExists(local.resultStruct,"success")){
+                if(len(arguments.rc.profileDefault) && len(arguments.rc.profileImage)){
+                    local.previousImagePath=expandPath("assets/contactPictures/#arguments.rc.profileDefault#");
+                    if(fileExists(local.previousImagePath)){
+                        fileDelete(local.previousImagePath);
+                    }
+                }
+                local.resultStruct["profileImage"] = local.imageFileName;
+            }
+            
+        }
+        variables.framework.renderData().data( local.resultStruct ).type( "json" );
+    }
+    public string function deleteContact(required struct rc){
+        param name="rc.contactId" default="";
+        if(len(rc.contactId)){
+            local.resultStruct=variables.addressService.deleteContact(
+                contactId = rc.contactId,
+                userId = session.userId
+            )
         }
         variables.framework.renderData().data( local.resultStruct ).type( "json" );
     }

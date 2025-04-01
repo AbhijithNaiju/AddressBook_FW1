@@ -1,21 +1,21 @@
 <body>
-    <div class="header">
-        <a href="" class="logo">
-            <img src="assets/images/contact_book_logo.png" alt="Image not found">
-            <span>ADDRESS BOOK</span>
-        </a>
-        <div class="header_buttons">
-            <a href="./signup.cfm">
-                <img src="assets/images/user_icon.png" alt="Image not found">
-                Sign Up
-            </a>
-            <a href="./login.cfm">
-                <img src="assets/images/login-2.png" alt="Image not found">
-                Login
-            </a>
-        </div>
-    </div>
     <main class="main">
+        <div class="header">
+            <a href="" class="logo">
+                <img src="assets/images/contact_book_logo.png" alt="Image not found">
+                <span>ADDRESS BOOK</span>
+            </a>
+            <!--- <div class="header_buttons">
+                <a href="./signup.cfm">
+                    <img src="assets/images/user_icon.png" alt="Image not found">
+                    Sign Up
+                </a>
+                <a href="./login.cfm">
+                    <img src="assets/images/login-2.png" alt="Image not found">
+                    Login
+                </a>
+            </div> --->
+        </div>
         <div class="main_body">
             <div class="form_container">
                 <div class="form_left">
