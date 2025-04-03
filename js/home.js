@@ -1,53 +1,54 @@
 $(document).ready(function(){
-     $(document).on("click",".openEditModal",function(){
-        editId=this.value;
-        $("#createForm")[0].reset();
-        $(".errorMessage").text('');
-        document.getElementById("profileImageEdit").src = "assets/contactPictures/l60Hf.png";
-        if(editId == ""){
-            $("#modalHeading").text("CREATE CONTACT")
-        }else{
-            $("#modalHeading").text("EDIT CONTACT")
-            $.ajax({
-                type:"POST",
-                url:"index.cfm",
-                data:{
-                    contactId:editId,
-                    action:"jsFunctions.getContactData"
-                },
-                success: function(result) {
-                    if(result.success){
-                        $("#title").val(result.contactDetails.title);
-                        $("#firstName").val(result.contactDetails.firstName);
-                        $("#lastName").val(result.contactDetails.lastName);
-                        $("#gender").val(result.contactDetails.gender);
-                        $("#dateOfBirth").val(result.contactDetails.dateOfBirth);
-                        $("#profileDefault").val(result.contactDetails.profileImage);
-                        $("#address").val(result.contactDetails.address);
-                        $("#streetName").val(result.contactDetails.streetName);
-                        $("#pincode").val(result.contactDetails.pincode);
-                        $("#district").val(result.contactDetails.district);
-                        $("#state").val(result.contactDetails.state);
-                        $("#country").val(result.contactDetails.country);
-                        $("#phoneNumber").val(result.contactDetails.phoneNumber);
-                        $("#email").val(result.contactDetails.emailId);
-                        if((result.contactDetails.profileImage).length){
-                            imageFilename = result.contactDetails.profileImage;
-                        }else{
-                            imageFilename="l60Hf.png"
-                        }
-                        document.getElementById("profileImageEdit").src = "assets/contactPictures/"+imageFilename;
-                        $("#submitEditModalBtn").val(editId);
+    $(document).on("click",".openEditModal",function(){
+    editId=this.value;
+    $("#createForm")[0].reset();
+    $(".errorMessage").text('');
+    document.getElementById("profileImageEdit").src = "assets/contactPictures/l60Hf.png";
+    if(editId == ""){
+        $("#modalHeading").text("CREATE CONTACT")
+    }else{
+        $("#modalHeading").text("EDIT CONTACT")
+        $.ajax({
+            type:"POST",
+            url:"index.cfm",
+            data:{
+                contactId:editId,
+                action:"jsFunctions.getContactData"
+            },
+            success: function(result) {
+                if(result.success){
+                    $("#title").val(result.contactDetails.title);
+                    $("#firstName").val(result.contactDetails.firstName);
+                    $("#lastName").val(result.contactDetails.lastName);
+                    $("#gender").val(result.contactDetails.gender);
+                    $("#dateOfBirth").val(result.contactDetails.dateOfBirth);
+                    $("#profileDefault").val(result.contactDetails.profileImage);
+                    $("#address").val(result.contactDetails.address);
+                    $("#streetName").val(result.contactDetails.streetName);
+                    $("#pincode").val(result.contactDetails.pincode);
+                    $("#district").val(result.contactDetails.district);
+                    $("#state").val(result.contactDetails.state);
+                    $("#country").val(result.contactDetails.country);
+                    $("#phoneNumber").val(result.contactDetails.phoneNumber);
+                    $("#email").val(result.contactDetails.emailId);
+                    if((result.contactDetails.profileImage).length){
+                        imageFilename = result.contactDetails.profileImage;
                     }else{
-                        alert("Error ocuured while fetching data please try again");
+                        imageFilename="l60Hf.png"
                     }
-                },
-                error:function(){
-                    alert("An error occured")
+                    document.getElementById("profileImageEdit").src = "assets/contactPictures/"+imageFilename;
+                    $("#submitEditModalBtn").val(editId);
+                }else{
+                    alert("Error ocuured while fetching data please try again");
                 }
-            });
-        }
-     });
+            },
+            error:function(){
+                alert("An error occured")
+            }
+        });
+    }
+    });
+
     $(document).on("click",".openViewModal",function(){
         viewId = this.value;
         viewModalBody=document.getElementById("viewModalBody");
@@ -125,6 +126,20 @@ $(document).ready(function(){
         });
     });
 
+    $("#profileImage").change(function(){
+        if(checkImage(this)){
+            $("#profileImageEdit").attr("src",URL.createObjectURL(this.files.item(0)));
+            $(this).val('');
+        }else{
+            if($("#profileDefault").val()){
+                defaultProfileImage=$("#profileDefault").val();
+            }else{
+                defaultProfileImage="l60Hf.png";
+            }
+            $("#profileImageEdit").attr("src","./assets/contactPictures/"+defaultProfileImage);
+        }
+    });
+
     $("#submitEditModalBtn").click(function(){
         const contactId = this.value;
         let title = $("#title").val();
@@ -140,11 +155,10 @@ $(document).ready(function(){
         let country = $("#country").val();
         let phoneNumber = $("#phoneNumber").val();
         let email = $("#email").val();
-        let profileImage = $("#profileImage").val();
-    
-        
+        let profileImage = document.getElementById("profileImage");
+
         isError=false;
-    
+
         if(checkLength(title,"titleError") == false){
             isError=true;
         }
@@ -270,8 +284,8 @@ $(document).ready(function(){
                 }
             });
         }
-     });
-     
+    });
+    
     $("#logout").click(function(){
         Swal.fire({
             title: "Are you sure?",
@@ -294,6 +308,5 @@ $(document).ready(function(){
             }
         });
     });
-
 });
 

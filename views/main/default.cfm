@@ -141,9 +141,9 @@
                     <div class="editModalElement">
                         <div class="w-100">
                             <label for="">Upload Photo *</label>
-                            <input type="file" class="formElement" id="profileImage" name="profileImage">
-                            <input type="hidden" name="profileDefault" id="profileDefault">
+                            <input type="file" class="formElement" id="profileImage" name="profileImage" accept="image/*">
                             <div class="errorMessage" id="profileImageError"></div>
+                            <input type="hidden" name="profileDefault" id="profileDefault">
                         </div>
                     </div>
                     <div class="modalSubHeadng">
@@ -205,7 +205,7 @@
                     <div class="errorMessage text-center" id="editModalError"></div>
 
                 </div>
-                <div class="editFormImage">
+                <div class="viewFormImage">
                     <img src="assets/contactPictures/l60Hf.png" id="profileImageEdit" alt="Image not found">
                 </div>
             </div>

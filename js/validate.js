@@ -49,13 +49,11 @@ function checkPhone(input,errorMessageId){
 }
 function checkImage(input,errorMessageId){
     let isSuccess = true;
-    let allowedExtentions=["jpg","jpeg","png"];
-    let fileExtension = String(/[^.]+$/.exec(input)).toLowerCase();
 
-    if(allowedExtentions.includes(fileExtension)){
+    if(input.files.item(0).type.startsWith("image")){
         $("#"+errorMessageId).text("");
     }else{
-        $("#"+errorMessageId).text("Only JPG,JPEG and PNG files are allowed");
+        $("#"+errorMessageId).text("Only image files are allowed");
         isSuccess = false;
     }
     if(isSuccess == false){
