@@ -17,3 +17,4 @@
 		</cfoutput>
 	</div>
 </div>
+<cfdump  var="#request#">

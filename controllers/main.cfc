@@ -15,7 +15,7 @@ component accessors=true{
         if(len(rc.loginButton) AND len(rc.emailId) AND len(rc.password)){
             local.loginResult=variables.userService.userLogin(emailId=rc.emailId,password=rc.password);
             if(structKeyExists(local.loginResult, "success")){
-                location("index.cfm?action=main","false");
+                location("index.cfm","false");
             }else if(structKeyExists(local.loginResult, "error")){
                 rc.error = local.loginResult.error;
             }

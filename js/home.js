@@ -1,344 +1,45 @@
 $(document).ready(function(){
-    $("#closeEditModal").click(function(){
+     $(document).on("click",".openEditModal",function(){
+        editId=this.value;
         $("#createForm")[0].reset();
-    });
-});
-
-function openEditModal(editId){
-    $(".errorMessage").text('');
-    document.getElementById("profileImageEdit").src = "assets/contactPictures/l60Hf.png";
-    if(editId.value == ""){
-        $("#modalHeading").text("CREATE CONTACT")
-    }else{
-        $("#modalHeading").text("EDIT CONTACT")
-        $.ajax({
-            type:"POST",
-            url:"index.cfm",
-            data:{
-                contactId:editId.value,
-                action:"jsFunctions.getContactData"
-            },
-            success: function(result) {
-                if(result.success){
-                    $("#title").val(result.contactDetails.title);
-                    $("#firstName").val(result.contactDetails.firstName);
-                    $("#lastName").val(result.contactDetails.lastName);
-                    $("#gender").val(result.contactDetails.gender);
-                    $("#dateOfBirth").val(result.contactDetails.dateOfBirth);
-                    $("#profileDefault").val(result.contactDetails.profileImage);
-                    $("#address").val(result.contactDetails.address);
-                    $("#streetName").val(result.contactDetails.streetName);
-                    $("#pincode").val(result.contactDetails.pincode);
-                    $("#district").val(result.contactDetails.district);
-                    $("#state").val(result.contactDetails.state);
-                    $("#country").val(result.contactDetails.country);
-                    $("#phoneNumber").val(result.contactDetails.phoneNumber);
-                    $("#email").val(result.contactDetails.emailId);
-                    if((result.contactDetails.profileImage).length){
-                        imageFilename = result.contactDetails.profileImage;
-                    }else{
-                        imageFilename="l60Hf.png"
-                    }
-                    document.getElementById("profileImageEdit").src = "assets/contactPictures/"+imageFilename;
-                    $("#submitEditModalBtn").val(editId.value);
-                }else{
-                    alert("Error ocuured while fetching data please try again");
-                }
-            },
-            error:function(){
-                alert("An error occured")
-            }
-        });
-    }
-}
-
-function openViewModal(viewId)
-{
-    viewModalBody=document.getElementById("viewModalBody");
-    $(".contactItemValue").text('');
-    document.getElementById("viewModal").classList.remove("displayNone");
-    $.ajax({
-        type:"POST",
-        url:"index.cfm",
-        data:{
-            contactId:viewId.value,
-            action:"jsFunctions.getContactData"
-        },
-        success: function(result) {
-            if(result.success)
-            {
-                const contactName=result.contactDetails.title +' '+result.contactDetails.firstName+' '+result.contactDetails.lastName;
-                const contactAddress=result.contactDetails.address +', '+result.contactDetails.streetName+', '+result.contactDetails.district+', '+result.contactDetails.state+', '+result.contactDetails.country;
-                $("#viewContactName").text(contactName);
-                $("#viewContactGender").text(result.contactDetails.gender);
-                $("#viewContactDateOfBirth").text(result.contactDetails.dateOfBirth);
-                $("#viewContactAddress").text(contactAddress);
-                $("#viewContactPincode").text(result.contactDetails.pincode);
-                $("#viewContactEmailId").text(result.contactDetails.emailId);
-                $("#viewContactPhoneNumber").text(result.contactDetails.phoneNumber);
-                if((result.contactDetails.profileImage).length){
-                    imageSrc=result.contactDetails.profileImage;
-                }else{
-                    imageSrc="l60Hf.png"
-                }
-                document.getElementById("viewProfileImage").src = "./assets/contactPictures/"+imageSrc;
-            }else if(result.error){
-                alert("An error occured please reload the page and try again");
-            }else{
-                alert("Unexpected error occured");
-            }
-        },
-        error:function()
-        {
-            alert("An error occured")
-        }
-    });
-}
-
-function submitEditModal(contactId)
-{
-    let title = $("#title").val();
-    let firstName = $("#firstName").val();
-    let lastName = $("#lastName").val();
-    let gender = $("#gender").val();
-    let dateOfBirth = $("#dateOfBirth").val();
-    let address = $("#address").val();
-    let streetName = $("#streetName").val();
-    let pincode = $("#pincode").val();
-    let district = $("#district").val();
-    let state = $("#state").val();
-    let country = $("#country").val();
-    let phoneNumber = $("#phoneNumber").val();
-    let email = $("#email").val();
-    let profileImage = $("#profileImage").val();
-
-    let allowedExtentions=["jpg","jpeg","png"];
-    let fileExtension = String(/[^.]+$/.exec(profileImage)).toLowerCase();
-	let email_match=/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    
-    var titleError = "";
-    var firstNameError = "";
-    var lastNameError = "";
-    var genderError = "";
-    var dateOfBirthError = "";
-    var addressError = "";
-    var streetNameError = "";
-    var pincodeError = "";
-    var districtError = "";
-    var stateError = "";
-    var countryError = "";
-    var phoneNumberError = "";
-    var emailError = "";
-    var profileImageError = "";
-    
-    if(title.trim().length==0){
-        titleError = "Please enter title";
-    }
-    $("#titleError").text(titleError)
-
-    if(firstName.trim().length==0){
-        firstNameError = "Please enter first name";
-    }
-    $("#firstNameError").text(firstNameError);
-
-    if(lastName.trim().length==0){
-        lastNameError = "Please enter last name";
-    }
-    $("#lastNameError").text(lastNameError);
-
-    if(gender.trim().length==0){
-        genderError = "Please enter the gender";
-    }
-    $("#genderError").text(genderError);
-
-    if(dateOfBirth.trim().length==0){
-        dateOfBirthError = "Please enter the DOB";
-    }
-    $("#dateOfBirthError").text(dateOfBirthError);
-
-    if(address.trim().length==0){
-        addressError = "Please enter the address";
-    }
-    $("#addressError").text(addressError);
-
-    if(streetName.trim().length==0){
-        streetNameError = "Please enter the street name";
-    }
-    $("#streetNameError").text(streetNameError);
-
-    if(pincode.trim().length==0){
-        pincodeError = "Please enter the pincode";
-    }else if(isNaN(pincode)){
-        pincodeError = "Please enter a valid number";
-    }else if(pincode.trim().length != 6) {
-        pincodeError = "Pincode must be 6 digits";
-    }
-    $("#pincodeError").text(pincodeError);
-
-    if(district.trim().length==0){
-        districtError = "Please enter the district";
-    }
-    $("#districtError").text(districtError);
-
-    if(state.trim().length==0){
-        stateError = "Please enter the state";
-    }
-    $("#stateError").text(stateError);
-
-    if(country.trim().length==0){
-        countryError = "Please enter the country";
-    }
-    $("#countryError").text(countryError);
-
-    if(phoneNumber.trim().length==0){
-        phoneNumberError = "Please enter the phone number";
-    }
-    else if(isNaN(phoneNumber)){
-        phoneNumberError = "Please enter a valid number";
-    }else if(phoneNumber.trim().length != 10){
-        phoneNumberError = "Phone number must be 10 digits";
-    }
-    $("#phoneNumberError").text(phoneNumberError);
-
-
-    if(!profileImage || allowedExtentions.includes(fileExtension)){
-        profileImageError = "";
-    }else{
-        profileImageError = "Only JPG,JPEG and PNG files are allowed";
-    }
-    $("#profileImageError").text(profileImageError);
-
-    if(email.trim().length==0){
-        emailError = "Please enter the email";
-    }
-    else if(email_match.test(email)!=true) {
-        emailError = "Please enter a valid email";
-    }
-    $("#emailError").text(emailError);
-    
-    if( titleError  == "" &&
-        firstNameError  == "" &&
-        lastNameError  == "" &&
-        genderError  == "" &&
-        dateOfBirthError  == "" &&
-        addressError  == "" &&
-        streetNameError == "" &&
-        pincodeError == "" &&
-        districtError == "" &&
-        stateError == "" &&
-        countryError == "" &&
-        phoneNumberError == "" &&
-        emailError == "" &&
-        profileImageError == ""){
-
-        var formElement = document.getElementById("createForm");
-        var formData = new FormData(formElement);
-        formData.append("action","jsFunctions.addOrEditContact")
-        if(contactId.value){
-            formData.append("editContactId", contactId.value);
-        }
-        $.ajax({
-            type: "POST",
-            url: "index.cfm",
-            data: formData,
-            processData: false,
-            contentType: false,
-            success: function(result) {
-                if(result.error){
-                    $("#editModalError").text(result.error);
-                }
-                if(result.emailError){
-                    $("#emailError").text(result.emailError);
-                    $("#email").focus();
-                }
-                if(result.success){
-                    if(result.profileImage){
-                        newImageFilename="assets/contactPictures/"+result.profileImage;
-                    }else{
-                        newImageFilename="assets/contactPictures/l60Hf.png"
-                    }
-                    if(contactId.value){
-                        $("#contactItem_"+contactId.value).find(".listName").text(firstName+' '+lastName);
-                        $("#contactItem_"+contactId.value).find(".listEmail").text(email);
-                        $("#contactItem_"+contactId.value).find(".listPhone").text(phoneNumber);
-                        $("#contactItem_"+contactId.value).find(".profileImage").attr("src",+newImageFilename);
-                    }else{
-                        let contactItem=`
-                            <tr class="contactListItem" id="contactItem_${result.contactId}">
-                                <td class="listProfile">
-                                    <img src="${newImageFilename}" alt="Image not found" class="profileImage">
-                                </td>
-                                <td class="listName">
-                                    ${firstName+' '+lastName}
-                                </td>
-                                <td class="listEmail">
-                                    ${email}
-                                </td>
-                                <td class="listPhone">
-                                    ${phoneNumber}
-                                </td>
-                                <td class="listButton">
-                                    <button type="button" 
-                                        value="${result.contactId}" 
-                                        onclick="openEditModal(this)" 
-                                        class = "contactButtons"
-                                        data-bs-toggle="modal" 
-                                        data-bs-target="#editModal" 
-                                    >
-                                        EDIT
-                                    </button>
-                                    <button type="button" 
-                                        value="${result.contactId}" 
-                                        onclick="deleteContact(this)" 
-                                        class = "contactButtons"
-                                    >
-                                        DELETE
-                                    </button>
-                                    <button 
-                                        type="button" 
-                                        value="${result.contactId}" 
-                                        onclick="openViewModal(this)" 
-                                        class = "contactButtons"
-                                        data-bs-toggle="modal" 
-                                        data-bs-target="#viewModal" 
-                                    >
-                                        VIEW
-                                    </button>
-                                </td>
-                            </tr>
-                        `;
-                        $("#contactList").append(contactItem);
-                    }
-                    $("#editModal").modal("hide");
-                }
-            }
-        });
-    }
-}
-
-function deleteContact(deleteId){
-    Swal.fire({
-        title: "Are you sure?",
-        text: "This contact will be removed from addressbokk.",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonColor: "#3085d6",
-        cancelButtonColor: "#d33",
-        confirmButtonText: "Remove"
-    }).then((result) => {
-        if (result.isConfirmed) {
+        $(".errorMessage").text('');
+        document.getElementById("profileImageEdit").src = "assets/contactPictures/l60Hf.png";
+        if(editId == ""){
+            $("#modalHeading").text("CREATE CONTACT")
+        }else{
+            $("#modalHeading").text("EDIT CONTACT")
             $.ajax({
                 type:"POST",
                 url:"index.cfm",
                 data:{
-                    contactId:deleteId.value,
-                    action:"jsFunctions.deleteContact"
+                    contactId:editId,
+                    action:"jsFunctions.getContactData"
                 },
                 success: function(result) {
                     if(result.success){
-                        deleteId.parentElement.parentElement.remove();
+                        $("#title").val(result.contactDetails.title);
+                        $("#firstName").val(result.contactDetails.firstName);
+                        $("#lastName").val(result.contactDetails.lastName);
+                        $("#gender").val(result.contactDetails.gender);
+                        $("#dateOfBirth").val(result.contactDetails.dateOfBirth);
+                        $("#profileDefault").val(result.contactDetails.profileImage);
+                        $("#address").val(result.contactDetails.address);
+                        $("#streetName").val(result.contactDetails.streetName);
+                        $("#pincode").val(result.contactDetails.pincode);
+                        $("#district").val(result.contactDetails.district);
+                        $("#state").val(result.contactDetails.state);
+                        $("#country").val(result.contactDetails.country);
+                        $("#phoneNumber").val(result.contactDetails.phoneNumber);
+                        $("#email").val(result.contactDetails.emailId);
+                        if((result.contactDetails.profileImage).length){
+                            imageFilename = result.contactDetails.profileImage;
+                        }else{
+                            imageFilename="l60Hf.png"
+                        }
+                        document.getElementById("profileImageEdit").src = "assets/contactPictures/"+imageFilename;
+                        $("#submitEditModalBtn").val(editId);
                     }else{
-                        alert("An unexpected error occured")
+                        alert("Error ocuured while fetching data please try again");
                     }
                 },
                 error:function(){
@@ -346,28 +47,253 @@ function deleteContact(deleteId){
                 }
             });
         }
-    });
-}
+     });
+    $(document).on("click",".openViewModal",function(){
+        viewId = this.value;
+        viewModalBody=document.getElementById("viewModalBody");
+        $(".contactItemValue").text('');
+        document.getElementById("viewModal").classList.remove("displayNone");
+        $.ajax({
+            type:"POST",
+            url:"index.cfm",
+            data:{
+                contactId:viewId,
+                action:"jsFunctions.getContactData"
+            },
+            success: function(result) {
+                if(result.success)
+                {
+                    const contactName=result.contactDetails.title +' '+result.contactDetails.firstName+' '+result.contactDetails.lastName;
+                    const contactAddress=result.contactDetails.address +', '+result.contactDetails.streetName+', '+result.contactDetails.district+', '+result.contactDetails.state+', '+result.contactDetails.country;
+                    $("#viewContactName").text(contactName);
+                    $("#viewContactGender").text(result.contactDetails.gender);
+                    $("#viewContactDateOfBirth").text(result.contactDetails.dateOfBirth);
+                    $("#viewContactAddress").text(contactAddress);
+                    $("#viewContactPincode").text(result.contactDetails.pincode);
+                    $("#viewContactEmailId").text(result.contactDetails.emailId);
+                    $("#viewContactPhoneNumber").text(result.contactDetails.phoneNumber);
+                    if((result.contactDetails.profileImage).length){
+                        imageSrc=result.contactDetails.profileImage;
+                    }else{
+                        imageSrc="l60Hf.png"
+                    }
+                    document.getElementById("viewProfileImage").src = "./assets/contactPictures/"+imageSrc;
+                }else if(result.error){
+                    alert("An error occured please reload the page and try again");
+                }else{
+                    alert("Unexpected error occured");
+                }
+            },
+            error:function()
+            {
+                alert("An error occured")
+            }
+        });
+     });
 
-function logout(){
-	Swal.fire({
-        title: "Are you sure?",
-        text: "You will log out of this page and need to authenticate again to login",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonColor: "#3085d6",
-        cancelButtonColor: "#d33",
-        confirmButtonText: "Logout"
-    }).then((result) => {
-        if (result.isConfirmed){
+    $(document).on("click",".deleteContact",function(){
+        const deleteId=this.value;
+        Swal.fire({
+            title: "Are you sure?",
+            text: "This contact will be removed from addressbokk.",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Remove"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    type:"POST",
+                    url:"index.cfm",
+                    data:{
+                        contactId:deleteId,
+                        action:"jsFunctions.deleteContact"
+                    },
+                    success: function(result) {
+                        if(result.success){
+                            $("#contactItem_"+deleteId).remove();
+                        }else{
+                            alert("An unexpected error occured")
+                        }
+                    },
+                    error:function(){
+                        alert("An error occured")
+                    }
+                });
+            }
+        });
+    });
+
+    $("#submitEditModalBtn").click(function(){
+        const contactId = this.value;
+        let title = $("#title").val();
+        let firstName = $("#firstName").val();
+        let lastName = $("#lastName").val();
+        let gender = $("#gender").val();
+        let dateOfBirth = $("#dateOfBirth").val();
+        let address = $("#address").val();
+        let streetName = $("#streetName").val();
+        let pincode = $("#pincode").val();
+        let district = $("#district").val();
+        let state = $("#state").val();
+        let country = $("#country").val();
+        let phoneNumber = $("#phoneNumber").val();
+        let email = $("#email").val();
+        let profileImage = $("#profileImage").val();
+    
+        
+        isError=false;
+    
+        if(checkLength(title,"titleError") == false){
+            isError=true;
+        }
+        if(checkLength(firstName,"firstNameError") == false){
+            isError=true;
+        }
+        if(checkLength(lastName,"lastNameError") == false){
+            isError=true;
+        }
+        if(checkLength(gender,"genderError") == false){
+            isError=true;
+        }
+        if(checkLength(dateOfBirth,"dateOfBirthError") == false){
+            isError=true;
+        }
+        if(checkLength(address,"addressError") == false){
+            isError=true;
+        }
+        if(checkLength(streetName,"streetNameError") == false){
+            isError=true;
+        }
+        if(checkLength(district,"districtError") == false){
+            isError=true;
+        }
+        if(checkLength(state,"stateError") == false){
+            isError=true;
+        }
+        if(checkLength(country,"countryError") == false){
+            isError=true;
+        }
+        if(checkPincode(pincode,"pincodeError") == false){
+            isError=true;
+        }
+        if(checkPhone(phoneNumber,"phoneNumberError") == false){
+            isError=true;
+        }
+        if(profileImage && checkImage(profileImage,"profileImageError") == false){
+            isError=true;
+        }
+        if(checkEmail(email,"emailError") == false){
+            isError=true;
+        }
+        
+        if(!isError){
+            var formElement = document.getElementById("createForm");
+            var formData = new FormData(formElement);
+            formData.append("action","jsFunctions.addOrEditContact")
+            if(contactId){
+                formData.append("editContactId", contactId);
+            }
             $.ajax({
-                type:"POST",
-                url:"index.cfm",
-                data:{action:"jsFunctions.logout"},
-                success: function() {
-                    location.reload();
+                type: "POST",
+                url: "index.cfm",
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(result) {
+                    if(result.error){
+                        $("#editModalError").text(result.error);
+                    }
+                    if(result.emailError){
+                        $("#emailError").text(result.emailError);
+                        $("#email").focus();
+                    }
+                    if(result.imageError){
+                        $("#profileImageError").text(result.imageError);
+                        $("#profileImage").focus();
+                    }
+                    if(result.success){
+                        if(result.profileImage){
+                            newImageFilename="assets/contactPictures/"+result.profileImage;
+                        }else{
+                            newImageFilename="assets/contactPictures/l60Hf.png"
+                        }
+                        if(contactId){
+                            $("#contactItem_"+contactId).find(".listName").text(firstName+' '+lastName);
+                            $("#contactItem_"+contactId).find(".listEmail").text(email);
+                            $("#contactItem_"+contactId).find(".listPhone").text(phoneNumber);
+                            $("#contactItem_"+contactId).find(".profileImage").attr("src",newImageFilename);
+                        }else{
+                            let contactItem=`
+                                <tr class="contactListItem" id="contactItem_${result.contactId}">
+                                    <td class="listProfile">
+                                        <img src="${newImageFilename}" alt="Image not found" class="profileImage">
+                                    </td>
+                                    <td class="listName">${firstName+' '+lastName}</td>
+                                    <td class="listEmail">${email}</td>
+                                    <td class="listPhone">${phoneNumber}</td>
+                                    <td class="listButton">
+                                        <button type="button" 
+                                            value="${result.contactId}" 
+                                            onclick="openEditModal(this)" 
+                                            class = "contactButtons"
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#editModal" 
+                                        >
+                                            EDIT
+                                        </button>
+                                        <button type="button" 
+                                            value="${result.contactId}" 
+                                            onclick="deleteContact(this)" 
+                                            class = "contactButtons"
+                                        >
+                                            DELETE
+                                        </button>
+                                        <button 
+                                            type="button" 
+                                            value="${result.contactId}" 
+                                            onclick="openViewModal(this)" 
+                                            class = "contactButtons"
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#viewModal" 
+                                        >
+                                            VIEW
+                                        </button>
+                                    </td>
+                                </tr>
+                            `;
+                            $("#contactList").append(contactItem);
+                        }
+                        $("#editModal").modal("hide");
+                    }
                 }
             });
         }
-	});
-}
+     });
+     
+    $("#logout").click(function(){
+        Swal.fire({
+            title: "Are you sure?",
+            text: "You will log out of this page and need to authenticate again to login",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Logout"
+        }).then((result) => {
+            if (result.isConfirmed){
+                $.ajax({
+                    type:"POST",
+                    url:"index.cfm",
+                    data:{action:"jsFunctions.logout"},
+                    success: function() {
+                    location.reload();
+                    }
+                });
+            }
+        });
+    });
+
+});
+
